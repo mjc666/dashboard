@@ -1,3 +1,5 @@
+import Dashboard from "@/components/Dashboard";
+
 export default function Home() {
   return (
     <div className="min-h-screen bg-zinc-950 text-zinc-100">
@@ -5,7 +7,7 @@ export default function Home() {
         <h1 className="text-2xl font-bold">Dashboard</h1>
       </header>
       <main className="p-6">
-        <p className="text-zinc-400">Real-time datapoints coming soon.</p>
+        <Dashboard />
       </main>
     </div>
   );
