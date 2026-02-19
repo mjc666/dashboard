@@ -23,6 +23,7 @@ const SYMBOLS = [
   { key: "^DJI", label: "Dow Jones", prefix: "" },
   { key: "^IXIC", label: "NASDAQ", prefix: "" },
   { key: "^GSPC", label: "S&P 500", prefix: "" },
+  { key: "^VIX", label: "VIX", prefix: "" },
   { key: "GC=F", label: "Gold", prefix: "$" },
   { key: "SI=F", label: "Silver", prefix: "$" },
 ] as const;

@@ -1,4 +1,4 @@
-const SYMBOLS = ["BTC-USD", "^DJI", "^IXIC", "^GSPC", "GC=F", "SI=F"] as const;
+const SYMBOLS = ["BTC-USD", "^DJI", "^IXIC", "^GSPC", "^VIX", "GC=F", "SI=F"] as const;
 
 type QuoteResult =
   | {
