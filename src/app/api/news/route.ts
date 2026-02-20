@@ -15,26 +15,47 @@ type CachedData = {
 let cache: CachedData | null = null;
 const CACHE_TTL = 10 * 60 * 1000; // 10 minutes
 
+const RSS_FEEDS = [
+  { url: "https://techcrunch.com/category/artificial-intelligence/feed/", source: "TechCrunch" },
+  { url: "https://www.theverge.com/rss/ai-artificial-intelligence/index.xml", source: "The Verge" },
+];
+
+function parseItems(xml: string, source: string): Article[] {
+  const items: Article[] = [];
+  const itemRegex = /<item>([\s\S]*?)<\/item>/g;
+  let match;
+  while ((match = itemRegex.exec(xml)) !== null) {
+    const block = match[1];
+    const title = block.match(/<title>(?:<!\[CDATA\[)?(.*?)(?:\]\]>)?<\/title>/)?.[1] ?? "";
+    const link = block.match(/<link>(.*?)<\/link>/)?.[1] ?? "";
+    const pubDate = block.match(/<pubDate>(.*?)<\/pubDate>/)?.[1] ?? "";
+    if (title && link) {
+      items.push({ title, url: link, source, publishedAt: pubDate });
+    }
+  }
+  return items;
+}
+
+async function fetchFeed(feed: { url: string; source: string }): Promise<Article[]> {
+  try {
+    const res = await fetch(feed.url, {
+      headers: { "User-Agent": "Mozilla/5.0" },
+      signal: AbortSignal.timeout(10000),
+      cache: "no-store",
+    });
+    if (!res.ok) return [];
+    const xml = await res.text();
+    return parseItems(xml, feed.source);
+  } catch {
+    return [];
+  }
+}
+
 async function fetchNews(): Promise<Article[]> {
-  const apiKey = process.env.NEWS_API_KEY;
-  if (!apiKey) return [];
-
-  const url = `https://newsapi.org/v2/everything?q=artificial+intelligence+OR+AI+OR+LLM&language=en&sortBy=publishedAt&pageSize=6&apiKey=${apiKey}`;
-
-  const res = await fetch(url, {
-    signal: AbortSignal.timeout(10000),
-    cache: "no-store",
-  });
-
-  if (!res.ok) return [];
-
-  const json = await res.json();
-  return (json.articles ?? []).map((a: Record<string, unknown>) => ({
-    title: a.title as string,
-    url: a.url as string,
-    source: (a.source as Record<string, unknown>)?.name ?? "Unknown",
-    publishedAt: a.publishedAt as string,
-  }));
+  const results = await Promise.all(RSS_FEEDS.map(fetchFeed));
+  const all = results.flat();
+  all.sort((a, b) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime());
+  return all.slice(0, 6);
 }
 
 export async function GET() {
