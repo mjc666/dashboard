@@ -11,6 +11,19 @@ type QuoteResult =
     }
   | { error: string };
 
+function deriveMarketState(meta: Record<string, unknown>): string {
+  const tp = meta.currentTradingPeriod as
+    | Record<string, { start: number; end: number }>
+    | undefined;
+  if (!tp) return "CLOSED";
+
+  const now = Math.floor(Date.now() / 1000);
+  if (tp.regular && now >= tp.regular.start && now < tp.regular.end) return "REGULAR";
+  if (tp.pre && now >= tp.pre.start && now < tp.pre.end) return "PRE";
+  if (tp.post && now >= tp.post.start && now < tp.post.end) return "POST";
+  return "CLOSED";
+}
+
 async function fetchQuote(symbol: string): Promise<[string, QuoteResult]> {
   try {
     const url = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(symbol)}?interval=1d&range=1d`;
@@ -42,7 +55,7 @@ async function fetchQuote(symbol: string): Promise<[string, QuoteResult]> {
         price,
         change,
         changePercent,
-        marketState: meta.marketState ?? "CLOSED",
+        marketState: deriveMarketState(meta),
       },
     ];
   } catch {
