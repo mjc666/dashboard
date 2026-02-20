@@ -1,6 +1,6 @@
 export const dynamic = "force-dynamic";
 
-const SYMBOLS = ["BTC-USD", "^DJI", "^IXIC", "^GSPC", "^VIX", "GC=F", "SI=F"] as const;
+const SYMBOLS = ["BTC-USD", "^DJI", "^IXIC", "^GSPC", "^VIX", "GC=F", "SI=F", "EURUSD=X", "GBPUSD=X"] as const;
 
 type QuoteResult =
   | {
