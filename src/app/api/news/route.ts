@@ -20,6 +20,17 @@ const RSS_FEEDS = [
   { url: "https://www.theverge.com/rss/ai-artificial-intelligence/index.xml", source: "The Verge" },
 ];
 
+function decodeEntities(str: string): string {
+  const entities: Record<string, string> = {
+    "&amp;": "&", "&lt;": "<", "&gt;": ">", "&quot;": '"', "&apos;": "'",
+    "&#8217;": "\u2019", "&#8216;": "\u2018", "&#8220;": "\u201C", "&#8221;": "\u201D",
+    "&#8211;": "\u2013", "&#8212;": "\u2014", "&#038;": "&", "&#8230;": "\u2026",
+  };
+  return str
+    .replace(/&#(\d+);/g, (_, code) => String.fromCharCode(Number(code)))
+    .replace(/&[a-z]+;|&#\d+;/gi, (m) => entities[m] ?? m);
+}
+
 function parseItems(xml: string, source: string): Article[] {
   const items: Article[] = [];
   const itemRegex = /<item>([\s\S]*?)<\/item>/g;
@@ -30,7 +41,7 @@ function parseItems(xml: string, source: string): Article[] {
     const link = block.match(/<link>(.*?)<\/link>/)?.[1] ?? "";
     const pubDate = block.match(/<pubDate>(.*?)<\/pubDate>/)?.[1] ?? "";
     if (title && link) {
-      items.push({ title, url: link, source, publishedAt: pubDate });
+      items.push({ title: decodeEntities(title), url: link, source, publishedAt: pubDate });
     }
   }
   return items;

@@ -36,8 +36,8 @@ export default function Clock() {
   return (
     <div className="rounded-2xl border border-zinc-800 bg-zinc-900 p-6">
       <p className="text-sm text-zinc-400">Local Time</p>
-      <p className="mt-1 text-4xl font-bold tabular-nums">{time}</p>
-      <p className="mt-2 text-sm text-zinc-400">{date}</p>
+      <p className="mt-2 text-2xl font-bold tabular-nums">{time}</p>
+      <p className="mt-1 text-sm text-zinc-400">{date}</p>
     </div>
   );
 }

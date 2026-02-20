@@ -17,13 +17,14 @@ export default function SearchCard() {
   }
 
   return (
-    <div className="rounded-2xl border border-zinc-800 bg-zinc-900 p-6">
+    <div className="flex h-full flex-col rounded-2xl border border-zinc-800 bg-zinc-900 p-6">
       <p className="text-sm text-zinc-400">Brave Search</p>
-      <form onSubmit={handleSubmit} className="mt-3 flex gap-2">
+      <form onSubmit={handleSubmit} className="mt-auto flex gap-2">
         <input
           type="text"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
+          onKeyDown={(e) => e.stopPropagation()}
           placeholder="Search the web..."
           className="min-w-0 flex-1 rounded-lg bg-zinc-800 px-3 py-2 text-sm text-zinc-100 placeholder-zinc-500 outline-none focus:ring-1 focus:ring-zinc-600"
         />
