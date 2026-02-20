@@ -9,9 +9,9 @@ const BOOKMARKS = [
 
 export default function BookmarksCard() {
   return (
-    <div className="rounded-2xl border border-zinc-800 bg-zinc-900 p-6">
+    <div className="flex h-full flex-col rounded-2xl border border-zinc-800 bg-zinc-900 p-6">
       <p className="text-sm text-zinc-400">AI Chatbots</p>
-      <div className="mt-3 grid grid-cols-2 gap-2">
+      <div className="mt-auto grid grid-cols-3 gap-2">
         {BOOKMARKS.map(({ name, url }) => (
           <a
             key={name}
