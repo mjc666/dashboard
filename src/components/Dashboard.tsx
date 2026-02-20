@@ -20,6 +20,7 @@ import Clock from "./Clock";
 import MarketCard from "./MarketCard";
 import NewsCard from "./NewsCard";
 import BookmarksCard from "./BookmarksCard";
+import SearchCard from "./SearchCard";
 import SortableWidget from "./SortableWidget";
 
 type QuoteData = {
@@ -45,7 +46,7 @@ type Article = {
 
 type Widget = {
   id: string;
-  type: "clock" | "market" | "news" | "bookmarks";
+  type: "clock" | "market" | "news" | "bookmarks" | "search";
   symbol?: { key: string; label: string; prefix: string };
 };
 
@@ -60,6 +61,7 @@ const DEFAULT_WIDGETS: Widget[] = [
   { id: "market-SI", type: "market", symbol: { key: "SI=F", label: "Silver", prefix: "$" } },
   { id: "market-EURUSD", type: "market", symbol: { key: "EURUSD=X", label: "EUR/USD", prefix: "" } },
   { id: "market-GBPUSD", type: "market", symbol: { key: "GBPUSD=X", label: "GBP/USD", prefix: "" } },
+  { id: "search", type: "search" },
   { id: "bookmarks", type: "bookmarks" },
   { id: "news", type: "news" },
 ];
@@ -181,6 +183,8 @@ export default function Dashboard() {
         return <NewsCard articles={articles} />;
       case "bookmarks":
         return <BookmarksCard />;
+      case "search":
+        return <SearchCard />;
     }
   }
 
