@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 const SYMBOLS = ["BTC-USD", "^DJI", "^IXIC", "^GSPC", "^VIX", "GC=F", "SI=F"] as const;
 
 type QuoteResult =
@@ -15,6 +17,7 @@ async function fetchQuote(symbol: string): Promise<[string, QuoteResult]> {
     const res = await fetch(url, {
       headers: { "User-Agent": "Mozilla/5.0" },
       signal: AbortSignal.timeout(10000),
+      cache: "no-store",
     });
 
     if (!res.ok) {
