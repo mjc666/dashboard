@@ -21,6 +21,7 @@ import MarketCard from "./MarketCard";
 import NewsCard from "./NewsCard";
 import BookmarksCard from "./BookmarksCard";
 import SearchCard from "./SearchCard";
+import FinanceNewsCard from "./FinanceNewsCard";
 import SortableWidget from "./SortableWidget";
 
 type QuoteData = {
@@ -46,7 +47,7 @@ type Article = {
 
 type Widget = {
   id: string;
-  type: "clock" | "market" | "news" | "bookmarks" | "search";
+  type: "clock" | "market" | "news" | "finance-news" | "bookmarks" | "search";
   symbol?: { key: string; label: string; prefix: string };
 };
 
@@ -64,6 +65,7 @@ const DEFAULT_WIDGETS: Widget[] = [
   { id: "search", type: "search" },
   { id: "bookmarks", type: "bookmarks" },
   { id: "news", type: "news" },
+  { id: "finance-news", type: "finance-news" },
 ];
 
 const STORAGE_KEY = "dashboard-widget-order";
@@ -108,6 +110,7 @@ export default function Dashboard() {
   const [widgets, setWidgets] = useState<Widget[]>(DEFAULT_WIDGETS);
   const [quotes, setQuotes] = useState<Record<string, QuoteResult> | null>(null);
   const [articles, setArticles] = useState<Article[] | null>(null);
+  const [financeArticles, setFinanceArticles] = useState<Article[] | null>(null);
   const [lastUpdated, setLastUpdated] = useState<string | null>(null);
 
   useEffect(() => {
@@ -137,6 +140,17 @@ export default function Dashboard() {
     }
   }, []);
 
+  const fetchFinanceNews = useCallback(async () => {
+    try {
+      const res = await fetch("/api/finance-news");
+      if (!res.ok) return;
+      const data = await res.json();
+      setFinanceArticles(data.articles);
+    } catch {
+      // Keep stale data on failure
+    }
+  }, []);
+
   useEffect(() => {
     fetchMarketData();
     const id = setInterval(fetchMarketData, MARKET_POLL_INTERVAL);
@@ -148,6 +162,12 @@ export default function Dashboard() {
     const id = setInterval(fetchNews, NEWS_POLL_INTERVAL);
     return () => clearInterval(id);
   }, [fetchNews]);
+
+  useEffect(() => {
+    fetchFinanceNews();
+    const id = setInterval(fetchFinanceNews, NEWS_POLL_INTERVAL);
+    return () => clearInterval(id);
+  }, [fetchFinanceNews]);
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
@@ -181,6 +201,8 @@ export default function Dashboard() {
         );
       case "news":
         return <NewsCard articles={articles} />;
+      case "finance-news":
+        return <FinanceNewsCard articles={financeArticles} />;
       case "bookmarks":
         return <BookmarksCard />;
       case "search":
@@ -197,7 +219,7 @@ export default function Dashboard() {
               <SortableWidget
                 key={widget.id}
                 id={widget.id}
-                colSpan={widget.type === "news" ? 2 : 1}
+                colSpan={widget.type === "news" || widget.type === "finance-news" ? 2 : 1}
               >
                 {renderWidget(widget)}
               </SortableWidget>
