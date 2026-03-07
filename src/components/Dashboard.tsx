@@ -23,6 +23,7 @@ import BookmarksCard from "./BookmarksCard";
 import SearchCard from "./SearchCard";
 import FinanceNewsCard from "./FinanceNewsCard";
 import VibeRadioCard from "./VibeRadioCard";
+import MultiMarketCard from "./MultiMarketCard";
 import SortableWidget from "./SortableWidget";
 
 type QuoteData = {
@@ -48,22 +49,45 @@ type Article = {
 
 type Widget = {
   id: string;
-  type: "clock" | "market" | "news" | "finance-news" | "bookmarks" | "search" | "vibe-radio";
+  type: "clock" | "market" | "news" | "finance-news" | "bookmarks" | "search" | "vibe-radio" | "multi-market";
   symbol?: { key: string; label: string; prefix: string };
+  symbols?: { key: string; label: string; prefix?: string }[];
+  title?: string;
 };
 
 const DEFAULT_WIDGETS: Widget[] = [
   { id: "clock", type: "clock" },
   { id: "vibe-radio", type: "vibe-radio" },
   { id: "market-BTC-USD", type: "market", symbol: { key: "BTC-USD", label: "Bitcoin", prefix: "$" } },
-  { id: "market-DJI", type: "market", symbol: { key: "^DJI", label: "Dow Jones", prefix: "" } },
-  { id: "market-IXIC", type: "market", symbol: { key: "^IXIC", label: "NASDAQ", prefix: "" } },
-  { id: "market-GSPC", type: "market", symbol: { key: "^GSPC", label: "S&P 500", prefix: "" } },
+  { 
+    id: "market-stocks", 
+    type: "multi-market", 
+    title: "Stocks",
+    symbols: [
+      { key: "^DJI", label: "Dow Jones" },
+      { key: "^IXIC", label: "NASDAQ" },
+      { key: "^GSPC", label: "S&P 500" },
+    ]
+  },
   { id: "market-VIX", type: "market", symbol: { key: "^VIX", label: "VIX", prefix: "" } },
-  { id: "market-GC", type: "market", symbol: { key: "GC=F", label: "Gold", prefix: "$" } },
-  { id: "market-SI", type: "market", symbol: { key: "SI=F", label: "Silver", prefix: "$" } },
-  { id: "market-EURUSD", type: "market", symbol: { key: "EURUSD=X", label: "EUR/USD", prefix: "" } },
-  { id: "market-GBPUSD", type: "market", symbol: { key: "GBPUSD=X", label: "GBP/USD", prefix: "" } },
+  { 
+    id: "market-metals", 
+    type: "multi-market", 
+    title: "Metals",
+    symbols: [
+      { key: "GC=F", label: "Gold", prefix: "$" },
+      { key: "SI=F", label: "Silver", prefix: "$" },
+    ]
+  },
+  { 
+    id: "market-currencies", 
+    type: "multi-market", 
+    title: "Currencies",
+    symbols: [
+      { key: "EURUSD=X", label: "EUR/USD" },
+      { key: "GBPUSD=X", label: "GBP/USD" },
+    ]
+  },
   { id: "search", type: "search" },
   { id: "bookmarks", type: "bookmarks" },
   { id: "news", type: "news" },
@@ -195,6 +219,14 @@ export default function Dashboard() {
         return <Clock />;
       case "vibe-radio":
         return <VibeRadioCard />;
+      case "multi-market":
+        return (
+          <MultiMarketCard
+            title={widget.title!}
+            symbols={widget.symbols!}
+            quotes={quotes}
+          />
+        );
       case "market":
         return (
           <MarketCard
