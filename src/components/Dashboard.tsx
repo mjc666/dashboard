@@ -58,7 +58,16 @@ type Widget = {
 const DEFAULT_WIDGETS: Widget[] = [
   { id: "clock", type: "clock" },
   { id: "vibe-radio", type: "vibe-radio" },
-  { id: "market-BTC-USD", type: "market", symbol: { key: "BTC-USD", label: "Bitcoin", prefix: "$" } },
+  { 
+    id: "market-crypto", 
+    type: "multi-market", 
+    title: "Crypto",
+    symbols: [
+      { key: "BTC-USD", label: "Bitcoin", prefix: "$" },
+      { key: "ETH-USD", label: "Ethereum", prefix: "$" },
+      { key: "BAT-USD", label: "Basic Attention Token", prefix: "$" },
+    ]
+  },
   { 
     id: "market-stocks", 
     type: "multi-market", 
@@ -69,7 +78,6 @@ const DEFAULT_WIDGETS: Widget[] = [
       { key: "^GSPC", label: "S&P 500" },
     ]
   },
-  { id: "market-VIX", type: "market", symbol: { key: "^VIX", label: "VIX", prefix: "" } },
   { 
     id: "market-metals", 
     type: "multi-market", 
@@ -77,6 +85,7 @@ const DEFAULT_WIDGETS: Widget[] = [
     symbols: [
       { key: "GC=F", label: "Gold", prefix: "$" },
       { key: "SI=F", label: "Silver", prefix: "$" },
+      { key: "PL=F", label: "Platinum", prefix: "$" },
     ]
   },
   { 
@@ -86,6 +95,7 @@ const DEFAULT_WIDGETS: Widget[] = [
     symbols: [
       { key: "EURUSD=X", label: "EUR/USD" },
       { key: "GBPUSD=X", label: "GBP/USD" },
+      { key: "JPY=X", label: "USD/JPY" },
     ]
   },
   { id: "search", type: "search" },
