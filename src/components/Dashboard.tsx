@@ -22,6 +22,7 @@ import NewsCard from "./NewsCard";
 import BookmarksCard from "./BookmarksCard";
 import SearchCard from "./SearchCard";
 import FinanceNewsCard from "./FinanceNewsCard";
+import VibeRadioCard from "./VibeRadioCard";
 import SortableWidget from "./SortableWidget";
 
 type QuoteData = {
@@ -47,12 +48,13 @@ type Article = {
 
 type Widget = {
   id: string;
-  type: "clock" | "market" | "news" | "finance-news" | "bookmarks" | "search";
+  type: "clock" | "market" | "news" | "finance-news" | "bookmarks" | "search" | "vibe-radio";
   symbol?: { key: string; label: string; prefix: string };
 };
 
 const DEFAULT_WIDGETS: Widget[] = [
   { id: "clock", type: "clock" },
+  { id: "vibe-radio", type: "vibe-radio" },
   { id: "market-BTC-USD", type: "market", symbol: { key: "BTC-USD", label: "Bitcoin", prefix: "$" } },
   { id: "market-DJI", type: "market", symbol: { key: "^DJI", label: "Dow Jones", prefix: "" } },
   { id: "market-IXIC", type: "market", symbol: { key: "^IXIC", label: "NASDAQ", prefix: "" } },
@@ -191,6 +193,8 @@ export default function Dashboard() {
     switch (widget.type) {
       case "clock":
         return <Clock />;
+      case "vibe-radio":
+        return <VibeRadioCard />;
       case "market":
         return (
           <MarketCard
