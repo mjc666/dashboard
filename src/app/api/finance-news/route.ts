@@ -15,59 +15,52 @@ type CachedData = {
 let cache: CachedData | null = null;
 const CACHE_TTL = 10 * 60 * 1000; // 10 minutes
 
-const RSS_FEEDS = [
-  { url: "https://feeds.content.dowjones.io/public/rss/mw_topstories", source: "MarketWatch" },
-  { url: "https://search.cnbc.com/rs/search/combinedcms/view.xml?partnerId=wrss01&id=10001147", source: "CNBC" },
-];
+const FREE_SOURCES = ["CNBC", "Reuters", "Yahoo Finance", "Business Wire", "PR Newswire", "Investing.com", "Forbes"];
 
-function decodeEntities(str: string): string {
-  const entities: Record<string, string> = {
-    "&amp;": "&", "&lt;": "<", "&gt;": ">", "&quot;": '"', "&apos;": "'",
-    "&#8217;": "\u2019", "&#8216;": "\u2018", "&#8220;": "\u201C", "&#8221;": "\u201D",
-    "&#8211;": "\u2013", "&#8212;": "\u2014", "&#038;": "&", "&#8230;": "\u2026",
-  };
-  return str
-    .replace(/&#x([0-9a-fA-F]+);/g, (_, hex) => String.fromCharCode(parseInt(hex, 16)))
-    .replace(/&#(\d+);/g, (_, code) => String.fromCharCode(Number(code)))
-    .replace(/&[a-z]+;|&#\d+;/gi, (m) => entities[m] ?? m);
-}
+type FinnhubArticle = {
+  category: string;
+  datetime: number;
+  headline: string;
+  id: number;
+  image: string;
+  related: string;
+  source: string;
+  summary: string;
+  url: string;
+};
 
-function parseItems(xml: string, source: string): Article[] {
-  const items: Article[] = [];
-  const itemRegex = /<item>([\s\S]*?)<\/item>/g;
-  let match;
-  while ((match = itemRegex.exec(xml)) !== null) {
-    const block = match[1];
-    const title = block.match(/<title>(?:<!\[CDATA\[)?(.*?)(?:\]\]>)?<\/title>/)?.[1] ?? "";
-    const link = block.match(/<link>(.*?)<\/link>/)?.[1] ?? "";
-    const pubDate = block.match(/<pubDate>(.*?)<\/pubDate>/)?.[1] ?? "";
-    if (title && link) {
-      items.push({ title: decodeEntities(title), url: link, source, publishedAt: pubDate });
-    }
-  }
-  return items;
-}
-
-async function fetchFeed(feed: { url: string; source: string }): Promise<Article[]> {
-  try {
-    const res = await fetch(feed.url, {
-      headers: { "User-Agent": "Mozilla/5.0" },
-      signal: AbortSignal.timeout(10000),
-      cache: "no-store",
-    });
-    if (!res.ok) return [];
-    const xml = await res.text();
-    return parseItems(xml, feed.source);
-  } catch {
+async function fetchFinnhubNews(): Promise<Article[]> {
+  const apiKey = process.env.FINNHUB_API_KEY;
+  if (!apiKey) {
+    console.error("FINNHUB_API_KEY is not set");
     return [];
   }
-}
 
-async function fetchNews(): Promise<Article[]> {
-  const results = await Promise.all(RSS_FEEDS.map(fetchFeed));
-  const all = results.flat();
-  all.sort((a, b) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime());
-  return all.slice(0, 6);
+  try {
+    const res = await fetch(`https://finnhub.io/api/v1/news?category=general&token=${apiKey}`, {
+      cache: "no-store",
+      signal: AbortSignal.timeout(10000),
+    });
+
+    if (!res.ok) return [];
+
+    const data: FinnhubArticle[] = await res.json();
+    
+    // Filter by free sources
+    const filtered = data.filter((item) => 
+      FREE_SOURCES.some(source => item.source.toLowerCase().includes(source.toLowerCase()))
+    );
+
+    return filtered.map((item) => ({
+      title: item.headline,
+      url: item.url,
+      source: item.source,
+      publishedAt: new Date(item.datetime * 1000).toISOString(),
+    }));
+  } catch (error) {
+    console.error("Failed to fetch Finnhub news:", error);
+    return [];
+  }
 }
 
 export async function GET() {
@@ -80,11 +73,15 @@ export async function GET() {
     });
   }
 
-  const articles = await fetchNews();
-  cache = { articles, fetchedAt: now };
+  const articles = await fetchFinnhubNews();
+  // Sort and limit
+  articles.sort((a, b) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime());
+  const limited = articles.slice(0, 6);
+
+  cache = { articles: limited, fetchedAt: now };
 
   return Response.json(
-    { articles, fetchedAt: new Date().toISOString() },
+    { articles: limited, fetchedAt: new Date().toISOString() },
     { headers: { "Cache-Control": "no-store, max-age=0" } },
   );
 }
