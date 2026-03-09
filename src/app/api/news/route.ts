@@ -15,19 +15,23 @@ type CachedData = {
 let cache: CachedData | null = null;
 const CACHE_TTL = 10 * 60 * 1000; // 10 minutes
 
-type HNHit = {
+type NewsDataResult = {
   title: string;
-  url: string;
-  author: string;
-  created_at: string;
-  objectID: string;
+  link: string;
+  source_id: string;
+  pubDate: string;
 };
 
-async function fetchAINews(): Promise<Article[]> {
+async function fetchNewsDataAI(): Promise<Article[]> {
+  const apiKey = process.env.NEWSDATA_API_KEY;
+  if (!apiKey || apiKey === "your_newsdata_io_key_here") {
+    console.warn("NEWSDATA_API_KEY is not set correctly");
+    return [];
+  }
+
   try {
-    // search_by_date ensures we get the most recent AI stories
     const res = await fetch(
-      "https://hn.algolia.com/api/v1/search_by_date?query=AI&tags=story&hitsPerPage=15",
+      `https://newsdata.io/api/1/news?apikey=${apiKey}&q=artificial%20intelligence&category=technology&language=en`,
       {
         cache: "no-store",
         signal: AbortSignal.timeout(10000),
@@ -37,17 +41,16 @@ async function fetchAINews(): Promise<Article[]> {
     if (!res.ok) return [];
 
     const data = await res.json();
-    const hits: HNHit[] = data.hits || [];
+    const results: NewsDataResult[] = data.results || [];
 
-    return hits.map((hit) => ({
-      title: hit.title,
-      // Fallback to the HN discussion if there's no external URL
-      url: hit.url || `https://news.ycombinator.com/item?id=${hit.objectID}`,
-      source: "Hacker News",
-      publishedAt: hit.created_at,
+    return results.map((result) => ({
+      title: result.title,
+      url: result.link,
+      source: result.source_id.charAt(0).toUpperCase() + result.source_id.slice(1),
+      publishedAt: result.pubDate,
     }));
   } catch (error) {
-    console.error("Failed to fetch AI news from HN:", error);
+    console.error("Failed to fetch news from newsdata.io:", error);
     return [];
   }
 }
@@ -62,7 +65,7 @@ export async function GET() {
     });
   }
 
-  const articles = await fetchAINews();
+  const articles = await fetchNewsDataAI();
   const limited = articles.slice(0, 6);
 
   cache = { articles: limited, fetchedAt: now };
