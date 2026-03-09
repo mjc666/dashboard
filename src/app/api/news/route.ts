@@ -31,7 +31,7 @@ async function fetchNewsDataAI(): Promise<Article[]> {
 
   try {
     const res = await fetch(
-      `https://newsdata.io/api/1/news?apikey=${apiKey}&q=artificial%20intelligence&category=technology&language=en`,
+      `https://newsdata.io/api/1/news?apikey=${apiKey}&q=artificial%20intelligence&category=technology&language=en&country=us`,
       {
         cache: "no-store",
         signal: AbortSignal.timeout(10000),
