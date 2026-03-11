@@ -64,7 +64,7 @@ const DEFAULT_WIDGETS: Widget[] = [
     title: "Crypto",
     symbols: [
       { key: "BTC-USD", label: "Bitcoin", prefix: "$" },
-      { key: "ETH-USD", label: "Ethereum", prefix: "$" },
+      { key: "XRP-USD", label: "XRP", prefix: "$" },
       { key: "BAT-USD", label: "Basic Attention Token", prefix: "$" },
     ]
   },
