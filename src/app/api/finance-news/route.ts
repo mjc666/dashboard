@@ -15,7 +15,7 @@ type CachedData = {
 let cache: CachedData | null = null;
 const CACHE_TTL = 10 * 60 * 1000; // 10 minutes
 
-const FREE_SOURCES = ["CNBC", "Reuters", "Yahoo Finance", "Business Wire", "PR Newswire", "Investing.com", "Forbes"];
+const FREE_SOURCES = ["CNBC", "MarketWatch", "Yahoo Finance", "Business Wire", "PR Newswire", "Investing.com", "Forbes"];
 
 type FinnhubArticle = {
   category: string;
